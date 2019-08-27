@@ -12,13 +12,15 @@ class Thumbs extends Component {
         children: PropTypes.element.isRequired,
         transitionTime: PropTypes.number,
         selectedItem: PropTypes.number,
-        thumbWidth: PropTypes.number
+        thumbWidth: PropTypes.number,
+        withCustomComponents: PropTypes.bool,
     };
 
     static defaultProps = {
         selectedItem: 0,
         transitionTime: 350,
-        axis: 'horizontal'
+        axis: 'horizontal',
+        withCustomComponents: false,
     };
 
     constructor(props) {
@@ -246,17 +248,35 @@ class Thumbs extends Component {
         return firstItem;
     }
 
-    renderItems () {
-        return this.state.images.map((img, index) => {
-            const itemClass = klass.ITEM(false, index === this.state.selectedItem && this.state.hasMount);
+    getThumbProps (thumb, thumbIndex) {
+        const itemClass = klass.ITEM(false, thumbIndex === this.state.selectedItem && this.state.hasMount);
+        const item = this.props.withCustomComponents ? thumb : this.props.children[thumbIndex];
+        const onClick = this.handleClickItem.bind(this, thumbIndex, item)
 
-            const thumbProps = {
-              key: index,
-              ref: e => this.setThumbsRef(e, index),
-              className: itemClass,
-              onClick: this.handleClickItem.bind(this, index, this.props.children[index]),
-              onKeyDown: this.handleClickItem.bind(this, index, this.props.children[index])
-            };
+        return {
+            key: thumbIndex,
+            ref: e => this.setThumbsRef(e, thumbIndex),
+            className: itemClass,
+            onClick,
+            onKeyDown: onClick
+        };
+    }
+
+    renderItems () {
+        if (this.props.withCustomComponents) {
+            return this.props.children({ onImgLoad: this.setMountState }).map((item, index) => {
+                const thumbProps = this.getThumbProps(item, index);
+
+                return (
+                    <li {...thumbProps} role='button' tabIndex={0}>
+                        { item }
+                    </li>
+                );
+            })
+        }
+
+        return this.state.images.map((img, index) => {
+            const thumbProps = this.getThumbProps(img, index);
 
             if (index === 0) {
                 img = React.cloneElement(img, {
