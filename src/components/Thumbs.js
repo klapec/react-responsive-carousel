@@ -34,7 +34,7 @@ class Thumbs extends Component {
             visibleItems: 0,
             lastPosition: 0,
             showArrows: false,
-            images: this.props.withCustomComponents ? [] : this.getImages()
+            images: props.withCustomComponents ? [] : this.getImages()
         }
     }
 
@@ -49,7 +49,7 @@ class Thumbs extends Component {
                 firstItem: this.getFirstItem(props.selectedItem)
             });
         }
-        if (props.children !== this.props.children && !this.props.withCustomComponents) {
+        if (props.children !== this.props.children && !props.withCustomComponents) {
             this.setState({
                images: this.getImages()
             });
